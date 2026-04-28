@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Crew</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --bg: #090b0c;
+  --s1: #0f1214;
+  --s2: #141719;
+  --s3: #1a1d20;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.11);
+  --text: #dde2e8;
+  --muted: #6b7480;
+  --dim: #363c44;
+  --blue: #5aabf0;
+  --blue-bg: rgba(90,171,240,0.09);
+  --blue-border: rgba(90,171,240,0.22);
+  --green: #45cc88;
+  --green-bg: rgba(69,204,136,0.09);
+  --green-border: rgba(69,204,136,0.2);
+  --display: 'Syne', sans-serif;
+  --body: 'Inter', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--body); font-weight: 300; line-height: 1.7; overflow-x: hidden; }
+
+/* ── NAV ── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  background: rgba(9,11,12,0.88); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 3rem; height: 60px;
+}
+.nav-logo { font-family: var(--display); font-weight: 800; font-size: 1.05rem; color: var(--text); text-decoration: none; letter-spacing: 0.02em; }
+.nav-members {
+  display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
+}
+.nav-members::-webkit-scrollbar { display: none; }
+.nav-dot {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0 14px; height: 60px;
+  color: var(--muted); text-decoration: none; font-size: 0.75rem; font-weight: 500;
+  letter-spacing: 0.04em; border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s; white-space: nowrap;
+}
+.nav-dot:hover { color: var(--text); }
+.nav-dot.active { color: var(--blue); border-bottom-color: var(--blue); }
+.nav-dot .dot {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--s3); border: 1px solid var(--border2);
+  overflow: hidden; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700; color: var(--muted);
+}
+.nav-dot .dot img { width: 100%; height: 100%; object-fit: cover; }
+
+/* ── HERO LANDING ── */
+.landing {
+  min-height: 100vh; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 80px 2rem 4rem;
+  position: relative; overflow: hidden;
+}
+.landing::before {
+  content: '';
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(90,171,240,0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+.landing-eyebrow {
+  font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--green); margin-bottom: 1.5rem;
+  display: flex; align-items: center; gap: 10px; justify-content: center;
+}
+.landing-eyebrow::before, .landing-eyebrow::after {
+  content: ''; width: 30px; height: 1px; background: var(--green-border);
+}
+.landing-title {
+  font-family: var(--display); font-weight: 800;
+  font-size: clamp(3.5rem, 9vw, 8rem);
+  line-height: 0.95; letter-spacing: -0.03em; color: var(--text);
+  margin-bottom: 1.5rem;
+}
+.landing-title span { color: var(--blue); }
+.landing-sub {
+  font-size: 1rem; color: var(--muted); max-width: 460px; margin-bottom: 3rem; line-height: 1.8;
+}
+.member-bubbles {
+  display: flex; gap: -8px; justify-content: center; margin-bottom: 1rem;
+}
+.bubble {
+  width: 48px; height: 48px; border-radius: 50%;
+  background: var(--s3); border: 2px solid var(--bg);
+  margin-left: -10px; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--display); font-size: 0.8rem; font-weight: 700; color: var(--muted);
+  transition: transform 0.2s;
+}
+.bubble:first-child { margin-left: 0; }
+.bubble:hover { transform: translateY(-4px) scale(1.1); z-index: 10; }
+.bubble img { width: 100%; height: 100%; object-fit: cover; }
+.scroll-hint {
+  position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  color: var(--dim); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase;
+  animation: bounce 2s ease-in-out infinite;
+}
+.scroll-hint svg { opacity: 0.4; }
+@keyframes bounce { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(6px)} }
+
+/* ── MEMBER SECTION ── */
+.member-section {
+  min-height: 100vh; position: relative;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 6rem 0 4rem;
+}
+.member-section::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, var(--border2) 30%, var(--border2) 70%, transparent);
+}
+.member-number {
+  position: absolute; top: 4rem; right: 3rem;
+  font-family: var(--display); font-weight: 800;
+  font-size: clamp(6rem, 12vw, 10rem);
+  color: rgba(255,255,255,0.025); line-height: 1;
+  pointer-events: none; user-select: none;
+}
+.member-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 3rem; width: 100%;
+}
+.member-layout {
+  display: grid; grid-template-columns: 380px 1fr; gap: 5rem; align-items: start;
+}
+.member-layout.flip { grid-template-columns: 1fr 380px; }
+.member-layout.flip .member-photo-col { order: 2; }
+.member-layout.flip .member-info-col { order: 1; }
+
+/* Photo col */
+.member-photo-wrap { position: relative; }
+.member-photo-frame {
+  width: 100%; aspect-ratio: 3/4;
+  border-radius: 20px; overflow: hidden;
+  background: var(--s2); border: 1px solid var(--border);
+  position: relative;
+}
+.member-photo-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.member-photo-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+}
+.member-photo-placeholder svg { opacity: 0.12; }
+.member-photo-placeholder span { font-size: 0.7rem; color: var(--dim); }
+.photo-accent {
+  position: absolute; bottom: -12px; right: -12px;
+  width: 70%; height: 70%; border-radius: 16px;
+  border: 1px solid var(--blue-border);
+  z-index: -1; pointer-events: none;
+}
+.member-gallery-strip {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px;
+}
+.strip-thumb {
+  aspect-ratio: 1; border-radius: 10px; overflow: hidden;
+  background: var(--s2); border: 1px solid var(--border); cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+  display: flex; align-items: center; justify-content: center;
+}
+.strip-thumb:hover { transform: scale(1.04); border-color: var(--border2); }
+.strip-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.strip-thumb svg { opacity: 0.1; }
+
+/* Info col */
+.member-info-col { padding-top: 1rem; }
+.member-index {
+  font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--blue); margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 8px;
+}
+.member-index::after { content: ''; flex: 0 0 24px; height: 1px; background: var(--blue-border); }
+.member-name {
+  font-family: var(--display); font-weight: 800;
+  font-size: clamp(2.4rem, 5vw, 4rem);
+  line-height: 1; letter-spacing: -0.02em; color: var(--text);
+  margin-bottom: 0.4rem;
+}
+.member-role {
+  font-size: 0.85rem; color: var(--green); letter-spacing: 0.06em;
+  font-weight: 500; margin-bottom: 2rem; text-transform: uppercase;
+}
+.member-bio {
+  font-size: 0.95rem; color: var(--muted); line-height: 1.9;
+  margin-bottom: 2rem; max-width: 480px;
+}
+.member-bio p + p { margin-top: 1rem; }
+.member-facts {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1px;
+  background: var(--border); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden; margin-bottom: 2rem;
+}
+.fact {
+  background: var(--s1); padding: 0.9rem 1.1rem;
+}
+.fact-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--dim); margin-bottom: 3px; }
+.fact-value { font-size: 0.88rem; color: var(--text); font-weight: 500; }
+.member-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+.mtag {
+  font-size: 0.72rem; padding: 4px 11px; border-radius: 6px;
+  border: 1px solid var(--border); color: var(--muted); background: var(--s2);
+  letter-spacing: 0.03em;
+}
+.mtag.b { border-color: var(--blue-border); color: var(--blue); background: var(--blue-bg); }
+.mtag.g { border-color: var(--green-border); color: var(--green); background: var(--green-bg); }
+
+/* divider between sections */
+.section-divider {
+  max-width: 1200px; margin: 0 auto; padding: 0 3rem;
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--border); text-align: center;
+  padding: 3rem; color: var(--dim); font-size: 0.78rem;
+}
+footer span { color: var(--blue); }
+
+/* ── REVEAL ── */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity 0.7s, transform 0.7s; }
+.reveal.in { opacity: 1; transform: none; }
+.reveal-left { opacity: 0; transform: translateX(-28px); transition: opacity 0.7s, transform 0.7s; }
+.reveal-left.in { opacity: 1; transform: none; }
+.reveal-right { opacity: 0; transform: translateX(28px); transition: opacity 0.7s, transform 0.7s; }
+.reveal-right.in { opacity: 1; transform: none; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px){
+  nav { padding: 0 1.2rem; }
+  .nav-logo { display: none; }
+  .member-inner { padding: 0 1.5rem; }
+  .member-layout, .member-layout.flip { grid-template-columns: 1fr; gap: 2.5rem; }
+  .member-layout.flip .member-photo-col, .member-layout.flip .member-info-col { order: unset; }
+  .member-number { display: none; }
+  .landing { padding: 80px 1.5rem 4rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#top" class="nav-logo">The Crew</a>
+  <div class="nav-members">
+    <a href="#m1" class="nav-dot" data-target="m1"><div class="dot">AJ</div><span>Alex</span></a>
+    <a href="#m2" class="nav-dot" data-target="m2"><div class="dot">SM</div><span>Sofia</span></a>
+    <a href="#m3" class="nav-dot" data-target="m3"><div class="dot">MK</div><span>Marcus</span></a>
+    <a href="#m4" class="nav-dot" data-target="m4"><div class="dot">PR</div><span>Priya</span></a>
+    <a href="#m5" class="nav-dot" data-target="m5"><div class="dot">JL</div><span>Jordan</span></a>
+    <a href="#m6" class="nav-dot" data-target="m6"><div class="dot">CN</div><span>Chloe</span></a>
+    <a href="#m7" class="nav-dot" data-target="m7"><div class="dot">DT</div><span>Diego</span></a>
+    <a href="#m8" class="nav-dot" data-target="m8"><div class="dot">NW</div><span>Nina</span></a>
+  </div>
+</nav>
+
+<!-- LANDING -->
+<section class="landing" id="top">
+  <div class="landing-eyebrow">Est. 2019 &mdash; Still Going Strong</div>
+  <h1 class="landing-title">The<br/><span>Crew</span></h1>
+  <p class="landing-sub">Eight people. Countless memories. One page to hold it all. Scroll to meet everyone.</p>
+  <div class="member-bubbles">
+    <div class="bubble">AJ</div>
+    <div class="bubble">SM</div>
+    <div class="bubble">MK</div>
+    <div class="bubble">PR</div>
+    <div class="bubble">JL</div>
+    <div class="bubble">CN</div>
+    <div class="bubble">DT</div>
+    <div class="bubble">NW</div>
+  </div>
+  <div class="scroll-hint">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+    Scroll to explore
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     MEMBER 1 — Alex
+══════════════════════════════════ -->
+<section class="member-section" id="m1">
+  <div class="member-number">01</div>
+  <div class="member-inner">
+    <div class="member-layout">
+      <div class="member-photo-col reveal-left">
+        <div class="member-photo-wrap">
+          <div class="member-photo-frame">
+            <!-- Replace with: <img src="alex.jpg" alt="Alex"> -->
+            <div class="member-photo-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              <span>Alex's photo</span>
+            </div>
+          </div>
+          <div class="photo-accent"></div>
+        </div>
+        <div class="member-gallery-strip">
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+        </div>
+      </div>
+      <div class="member-info-col reveal-right">
+        <div class="member-index">Member 01</div>
+        <h2 class="member-name">Alex Johnson</h2>
+        <div class="member-role">Photographer &amp; Visual Artist</div>
+        <div class="member-bio">
+          <p>The one who always has a camera in hand. Alex has a gift for finding beauty in the mundane — a cracked sidewalk, a stranger's laugh, the way light hits a cup of coffee at 7am.</p>
+          <p>Joined the crew in 2019 and has since documented basically every major moment. Half the group's best memories exist because Alex was there to capture them.</p>
+        </div>
+        <div class="member-facts">
+          <div class="fact"><div class="fact-label">Based in</div><div class="fact-value">Brooklyn, NY</div></div>
+          <div class="fact"><div class="fact-label">Known for</div><div class="fact-value">Film photography</div></div>
+          <div class="fact"><div class="fact-label">Joined</div><div class="fact-value">2019</div></div>
+          <div class="fact"><div class="fact-label">Vibe</div><div class="fact-value">Golden hour obsessed</div></div>
+        </div>
+        <div class="member-tags">
+          <span class="mtag b">Photography</span>
+          <span class="mtag b">Film</span>
+          <span class="mtag g">Art</span>
+          <span class="mtag">Hiking</span>
+          <span class="mtag">Coffee</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     MEMBER 2 — Sofia
+══════════════════════════════════ -->
+<section class="member-section" id="m2">
+  <div class="member-number">02</div>
+  <div class="member-inner">
+    <div class="member-layout flip">
+      <div class="member-photo-col reveal-right">
+        <div class="member-photo-wrap">
+          <div class="member-photo-frame">
+            <div class="member-photo-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              <span>Sofia's photo</span>
+            </div>
+          </div>
+          <div class="photo-accent" style="border-color:var(--green-border)"></div>
+        </div>
+        <div class="member-gallery-strip">
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+        </div>
+      </div>
+      <div class="member-info-col reveal-left">
+        <div class="member-index" style="color:var(--green)">Member 02</div>
+        <h2 class="member-name">Sofia Martinez</h2>
+        <div class="member-role" style="color:var(--blue)">Designer &amp; Creative Director</div>
+        <div class="member-bio">
+          <p>Sofia is the reason everything looks good. From impromptu road trip playlists to the group chat name, her taste is unmatched and she's never afraid to tell you when something could be better.</p>
+          <p>She's the planner, the mood-setter, and the one who always knows a great restaurant no one's heard of yet.</p>
+        </div>
+        <div class="member-facts">
+          <div class="fact"><div class="fact-label">Based in</div><div class="fact-value">Los Angeles, CA</div></div>
+          <div class="fact"><div class="fact-label">Known for</div><div class="fact-value">Impeccable playlists</div></div>
+          <div class="fact"><div class="fact-label">Joined</div><div class="fact-value">2019</div></div>
+          <div class="fact"><div class="fact-label">Vibe</div><div class="fact-value">Effortlessly cool</div></div>
+        </div>
+        <div class="member-tags">
+          <span class="mtag b">Design</span>
+          <span class="mtag g">Music</span>
+          <span class="mtag g">Food</span>
+          <span class="mtag">Travel</span>
+          <span class="mtag">Books</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     MEMBER 3 — Marcus
+══════════════════════════════════ -->
+<section class="member-section" id="m3">
+  <div class="member-number">03</div>
+  <div class="member-inner">
+    <div class="member-layout">
+      <div class="member-photo-col reveal-left">
+        <div class="member-photo-wrap">
+          <div class="member-photo-frame">
+            <div class="member-photo-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              <span>Marcus's photo</span>
+            </div>
+          </div>
+          <div class="photo-accent"></div>
+        </div>
+        <div class="member-gallery-strip">
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+        </div>
+      </div>
+      <div class="member-info-col reveal-right">
+        <div class="member-index">Member 03</div>
+        <h2 class="member-name">Marcus Kim</h2>
+        <div class="member-role">Developer &amp; Tech Guy</div>
+        <div class="member-bio">
+          <p>Marcus built the group server, set up the shared photo drive, and once fixed someone's entire computer at 2am during a trip. He's also somehow the funniest person in the room without ever trying to be.</p>
+          <p>The one who says "I'll just code something quick" and then does it, immediately, better than expected.</p>
+        </div>
+        <div class="member-facts">
+          <div class="fact"><div class="fact-label">Based in</div><div class="fact-value">Seattle, WA</div></div>
+          <div class="fact"><div class="fact-label">Known for</div><div class="fact-value">Solving everything</div></div>
+          <div class="fact"><div class="fact-label">Joined</div><div class="fact-value">2020</div></div>
+          <div class="fact"><div class="fact-label">Vibe</div><div class="fact-value">Quietly legendary</div></div>
+        </div>
+        <div class="member-tags">
+          <span class="mtag b">Coding</span>
+          <span class="mtag b">Gaming</span>
+          <span class="mtag g">Cooking</span>
+          <span class="mtag">Movies</span>
+          <span class="mtag">Bouldering</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     MEMBER 4 — Priya
+══════════════════════════════════ -->
+<section class="member-section" id="m4">
+  <div class="member-number">04</div>
+  <div class="member-inner">
+    <div class="member-layout flip">
+      <div class="member-photo-col reveal-right">
+        <div class="member-photo-wrap">
+          <div class="member-photo-frame">
+            <div class="member-photo-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              <span>Priya's photo</span>
+            </div>
+          </div>
+          <div class="photo-accent" style="border-color:var(--green-border)"></div>
+        </div>
+        <div class="member-gallery-strip">
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+        </div>
+      </div>
+      <div class="member-info-col reveal-left">
+        <div class="member-index" style="color:var(--green)">Member 04</div>
+        <h2 class="member-name">Priya Reddy</h2>
+        <div class="member-role" style="color:var(--blue)">Writer &amp; Storyteller</div>
+        <div class="member-bio">
+          <p>Priya has a way with words that makes everything feel more meaningful. Her voice notes are legendary, her texts are essays, and her Instagram captions could be published in a literary journal.</p>
+          <p>She's the one who remembers every detail of every trip and will bring it up at the most perfect moment years later.</p>
+        </div>
+        <div class="member-facts">
+          <div class="fact"><div class="fact-label">Based in</div><div class="fact-value">Chicago, IL</div></div>
+          <div class="fact"><div class="fact-label">Known for</div><div class="fact-value">Voice notes @ 1am</div></div>
+          <div class="fact"><div class="fact-label">Joined</div><div class="fact-value">2019</div></div>
+          <div class="fact"><div class="fact-label">Vibe</div><div class="fact-value">Deep conversations</div></div>
+        </div>
+        <div class="member-tags">
+          <span class="mtag b">Writing</span>
+          <span class="mtag g">Poetry</span>
+          <span class="mtag">Reading</span>
+          <span class="mtag">Running</span>
+          <span class="mtag">Tea</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     MEMBER 5 — Jordan
+══════════════════════════════════ -->
+<section class="member-section" id="m5">
+  <div class="member-number">05</div>
+  <div class="member-inner">
+    <div class="member-layout">
+      <div class="member-photo-col reveal-left">
+        <div class="member-photo-wrap">
+          <div class="member-photo-frame">
+            <div class="member-photo-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              <span>Jordan's photo</span>
+            </div>
+          </div>
+          <div class="photo-accent"></div>
+        </div>
+        <div class="member-gallery-strip">
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+        </div>
+      </div>
+      <div class="member-info-col reveal-right">
+        <div class="member-index">Member 05</div>
+        <h2 class="member-name">Jordan Lee</h2>
+        <div class="member-role">Musician &amp; Producer</div>
+        <div class="member-bio">
+          <p>Jordan's the one who starts playing guitar and suddenly three hours have passed and nobody wants to leave. Their music has a warmth to it that's hard to describe but impossible to forget.</p>
+          <p>Also makes the best breakfast of anyone in the group, which is somehow just as impressive.</p>
+        </div>
+        <div class="member-facts">
+          <div class="fact"><div class="fact-label">Based in</div><div class="fact-value">Austin, TX</div></div>
+          <div class="fact"><div class="fact-label">Known for</div><div class="fact-value">Late night sessions</div></div>
+          <div class="fact"><div class="fact-label">Joined</div><div class="fact-value">2021</div></div>
+          <div class="fact"><div class="fact-label">Vibe</div><div class="fact-value">Good energy always</div></div>
+        </div>
+        <div class="member-tags">
+          <span class="mtag b">Music</span>
+          <span class="mtag b">Guitar</span>
+          <span class="mtag g">Cooking</span>
+          <span class="mtag">Cycling</span>
+          <span class="mtag">Vinyl</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     MEMBER 6 — Chloe
+══════════════════════════════════ -->
+<section class="member-section" id="m6">
+  <div class="member-number">06</div>
+  <div class="member-inner">
+    <div class="member-layout flip">
+      <div class="member-photo-col reveal-right">
+        <div class="member-photo-wrap">
+          <div class="member-photo-frame">
+            <div class="member-photo-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              <span>Chloe's photo</span>
+            </div>
+          </div>
+          <div class="photo-accent" style="border-color:var(--green-border)"></div>
+        </div>
+        <div class="member-gallery-strip">
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+        </div>
+      </div>
+      <div class="member-info-col reveal-left">
+        <div class="member-index" style="color:var(--green)">Member 06</div>
+        <h2 class="member-name">Chloe Nguyen</h2>
+        <div class="member-role" style="color:var(--blue)">Architect &amp; Urban Explorer</div>
+        <div class="member-bio">
+          <p>Chloe sees buildings differently. She'll stop mid-conversation to point out an interesting facade, and somehow that always makes the walk better. Her eye for space and structure is unreal.</p>
+          <p>She's also the group's unofficial travel agent — every trip she plans hits different because she researches it like a thesis project.</p>
+        </div>
+        <div class="member-facts">
+          <div class="fact"><div class="fact-label">Based in</div><div class="fact-value">Paris, France</div></div>
+          <div class="fact"><div class="fact-label">Known for</div><div class="fact-value">Perfect trip planning</div></div>
+          <div class="fact"><div class="fact-label">Joined</div><div class="fact-value">2020</div></div>
+          <div class="fact"><div class="fact-label">Vibe</div><div class="fact-value">Thoughtful &amp; sharp</div></div>
+        </div>
+        <div class="member-tags">
+        
+</section>
+
+<!-- ══════════════════════════════════
+     MEMBER 7 — Diego
+══════════════════════════════════ -->
+<section class="member-section" id="m7">
+  <div class="member-number">07</div>
+  <div class="member-inner">
+    <div class="member-layout">
+      <div class="member-photo-col reveal-left">
+        <div class="member-photo-wrap">
+          <div class="member-photo-frame">
+            <div class="member-photo-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              <span>Diego's photo</span>
+            </div>
+          </div>
+          <div class="photo-accent"></div>
+        </div>
+        <div class="member-gallery-strip">
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+        </div>
+      </div>
+      <div class="member-info-col reveal-right">
+        <div class="member-index">Member 07</div>
+        <h2 class="member-name">Diego Torres</h2>
+        <div class="member-role">Chef &amp; Food Blogger</div>
+        <div class="member-bio">
+          <p>Diego can turn any kitchen into a restaurant. He shows up to trips with spices, he has opinions about olive oil, and every meal he cooks becomes the highlight of the trip. It's a gift.</p>
+          <p>Off the stove, he's the warmest presence in the room — the kind of person who makes everyone feel at home wherever they are.</p>
+        </div>
+        <div class="member-facts">
+          <div class="fact"><div class="fact-label">Based in</div><div class="fact-value">Barcelona, Spain</div></div>
+          <div class="fact"><div class="fact-label">Known for</div><div class="fact-value">Sunday dinners</div></div>
+          <div class="fact"><div class="fact-label">Joined</div><div class="fact-value">2021</div></div>
+          <div class="fact"><div class="fact-label">Vibe</div><div class="fact-value">Warm &amp; generous</div></div>
+        </div>
+        <div class="member-tags">
+          <span class="mtag b">Cooking</span>
+          <span class="mtag b">Food</span>
+          <span class="mtag g">Travel</span>
+          <span class="mtag">Football</span>
+          <span class="mtag">Markets</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     MEMBER 8 — Nina
+══════════════════════════════════ -->
+<section class="member-section" id="m8">
+  <div class="member-number">08</div>
+  <div class="member-inner">
+    <div class="member-layout flip">
+      <div class="member-photo-col reveal-right">
+        <div class="member-photo-wrap">
+          <div class="member-photo-frame">
+            <div class="member-photo-placeholder">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+              <span>Nina's photo</span>
+            </div>
+          </div>
+          <div class="photo-accent" style="border-color:var(--green-border)"></div>
+        </div>
+        <div class="member-gallery-strip">
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+          <div class="strip-thumb"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M21 15l-5-5L5 21"/></svg></div>
+        </div>
+      </div>
+      <div class="member-info-col reveal-left">
+        <div class="member-index" style="color:var(--green)">Member 08</div>
+        <h2 class="member-name">Nina Weber</h2>
+        <div class="member-role" style="color:var(--blue)">Scientist &amp; Adventurer</div>
+        <div class="member-bio">
+          <p>Nina knows something fascinating about almost everything. She can tell you why the sky is that exact shade of orange, the history of wherever you're standing, and three fun facts about whatever you're eating.</p>
+          <p>Fearless traveler, excellent hiking companion, and the reason the group has taken seven spontaneous trips in three years.</p>
+        </div>
+        <div class="member-facts">
+          <div class="fact"><div class="fact-label">Based in</div><div class="fact-value">Berlin, Germany</div></div>
+          <div class="fact"><div class="fact-label">Known for</div><div class="fact-value">Random Wikipedia facts</div></div>
+          <div class="fact"><div class="fact-label">Joined</div><div class="fact-value">2019</div></div>
+          <div class="fact"><div class="fact-label">Vibe</div><div class="fact-value">Curious &amp; fearless</div></div>
+        </div>
+        <div class="member-tags">
+          <span class="mtag b">Science</span>
+          <span class="mtag g">Hiking</span>
+          <span class="mtag g">Travel</span>
+          <span class="mtag">Astronomy</span>
+          <span class="mtag">Climbing</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Made with care for <span>The Crew</span> &mdash; Est. 2019
+</footer>
+
+<script>
+// Scroll reveal
+const ro = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => ro.observe(el));
+
+// Active nav highlight
+const sections = document.querySelectorAll('.member-section');
+const navDots = document.querySelectorAll('.nav-dot[data-target]');
+const sectionObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      const id = e.target.id;
+      navDots.forEach(d => {
+        d.classList.toggle('active', d.dataset.target === id);
+      });
+    }
+  });
+}, { threshold: 0.4 });
+sections.forEach(s => sectionObs.observe(s));
+</script>
+</body>
+</html>
